@@ -7,6 +7,10 @@
 		<Setting Key="SiteDB_PendingCommand_Checking" SpName="SiteDB_PendingCommand_Checking" DbName="DBTXN.bodb02.wsv_nap" />
 	</Function>
 	<Function Name="Broadcast - Service">
+		<Setting Key="NAP_Set_Match_VS_Sel" SpName="NAP_Set_Match_VS_Sel" DbName="DBPRO.bodb02.wsv_nap" />
+		<Setting Key="NAP_SpecialDelete_Message_Insert" SpName="NAP_SpecialDelete_Message_Insert" DbName="DBMSG.bodb_Message.wsv_nap" />
+		<Setting Key="NAP_SpecialDelete_BatchMessage_Upload" SpName="NAP_SpecialDelete_BatchMessage_Upload" DbName="DBMSG.bodb_Message.wsv_nap" />
+
 		<Function Name="NAP_Admin_Settlement_s161">
 			<Setting Key="NAP_Admin_Settlement_s161_DBTXN" SpName="NAP_Admin_Settlement_s161" DbName="DBTXN.bodb02.wsv_nap" />
 			<Setting Key="NAP_Admin_Settlement_s161_DBSITE01" SpName="NAP_Admin_Settlement_s161" DbName="DBSITE01.bodb02.wsv_nap" />
@@ -18,6 +22,18 @@
 			<Setting Key="NAP_Admin_Settlement_VS_BetRadar_DBSITE01" SpName="NAP_Admin_Settlement_VS_BetRadar" DbName="DBSITE01.bodb02.wsv_nap" />
 			<Setting Key="NAP_Admin_Settlement_VS_BetRadar_DBSITE02" SpName="NAP_Admin_Settlement_VS_BetRadar" DbName="DBSITE02.bodb02.wsv_nap" />
 			<Setting Key="NAP_Admin_Settlement_VS_BetRadar_DBSITE03" SpName="NAP_Admin_Settlement_VS_BetRadar" DbName="DBSITE03.bodb02.wsv_nap" />
+		</Function>
+		<Function Name="TicketInfo">
+			<Setting Key="NAP_Set_VS_TicketInfo_Sel_DBTXN" SpName="NAP_Set_VS_TicketInfo_Sel" DbName="DBTXN.bodb02.wsv_nap" />
+			<Setting Key="NAP_Set_VS_TicketInfo_Sel_DBSITE01" SpName="NAP_Set_VS_TicketInfo_Sel" DbName="DBSITE01.bodb02.wsv_nap" />
+			<Setting Key="NAP_Set_VS_TicketInfo_Sel_DBSITE02" SpName="NAP_Set_VS_TicketInfo_Sel" DbName="DBSITE02.bodb02.wsv_nap" />
+			<Setting Key="NAP_Set_VS_TicketInfo_Sel_DBSITE03" SpName="NAP_Set_VS_TicketInfo_Sel" DbName="DBSITE03.bodb02.wsv_nap" />
+		</Function>
+		<Function Name="NAP_Admin_SendNotify_VS">
+			<Setting Key="NAP_Admin_SendNotify_VS_DBTXN" SpName="NAP_Admin_SendNotify_VS" DbName="DBTXN.bodb02.wsv_nap" />
+			<Setting Key="NAP_Admin_SendNotify_VS_DBSITE01" SpName="NAP_Admin_SendNotify_VS" DbName="DBSITE01.bodb02.wsv_nap" />
+			<Setting Key="NAP_Admin_SendNotify_VS_DBSITE02" SpName="NAP_Admin_SendNotify_VS" DbName="DBSITE02.bodb02.wsv_nap" />
+			<Setting Key="NAP_Admin_SendNotify_VS_DBSITE03" SpName="NAP_Admin_SendNotify_VS" DbName="DBSITE03.bodb02.wsv_nap" />
 		</Function>
 	</Function>
 </Functions>

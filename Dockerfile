@@ -2,6 +2,7 @@ FROM hub.nexdev.net/base/dotnet/core/sdk:9.0-alpine AS builder
 WORKDIR /src
 
 COPY ./Sources/Fanex.PendingCommand ./Fanex.PendingCommand
+COPY ./Sources/Fanex.PendingCommand.Broadcast ./Fanex.PendingCommand.Broadcast
 COPY ./Sources/Fanex.PendingCommand.Service/Fanex.PendingCommand.Service.csproj ./Fanex.PendingCommand.Service/Fanex.PendingCommand.Service.csproj
 
 WORKDIR /src/Fanex.PendingCommand.Service

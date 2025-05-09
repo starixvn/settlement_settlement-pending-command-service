@@ -1,4 +1,4 @@
-﻿namespace Fanex.PendingCommand.Criteria.Broadcast;
+﻿namespace Fanex.PendingCommand.Broadcast.Criteria;
 
 public class VirtualBetRadarCriteria : BroadcastCriteriaBase
 {

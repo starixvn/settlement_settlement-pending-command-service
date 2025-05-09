@@ -1,0 +1,86 @@
+﻿using Fanex.PendingCommand.Broadcast.Constants;
+using Fanex.PendingCommand.Broadcast.Services;
+using SportTypes = Settlement.Business.Core.Constants.SportType;
+
+namespace Fanex.PendingCommand.Broadcast.Models;
+
+public class MatchInfo
+{
+    public RefDataService RefDataService { get; set; }
+
+    public int MatchId { get; set; }
+
+    public bool IsMatch3rd { get; set; }
+
+    public string EventStatus { get; set; }
+
+    public string BetStatus { get; set; }
+
+    public DateTime EventDate { get; set; }
+
+    public short SportType { get; set; }
+
+    public string SportName => RefDataService.GetSportName(SportType, ContentLanguage.English);
+
+    public DateTime KickOffTime { get; set; }
+
+    public int LeagueId { get; set; }
+
+    public int HomeId { get; set; }
+
+    public int AwayId { get; set; }
+
+    public short? LeagueGroupId { get; set; }
+
+    public string VendorId { get; set; }
+
+    public string Distance { get; set; }
+
+    public string TeamName => GetTeamName(ContentLanguage.English);
+
+    public string TeamNameCh => GetTeamName(ContentLanguage.Cantonese);
+
+    public string TeamNameCs => GetTeamName(ContentLanguage.Mandarin);
+
+    public string TeamNameNewCs => GetTeamName(ContentLanguage.NewMandarin);
+
+    public string LeagueName => GetLeagueName(ContentLanguage.English);
+
+    public string LeagueNameCh => GetLeagueName(ContentLanguage.Cantonese);
+
+    public string LeagueNameCs => GetLeagueName(ContentLanguage.Mandarin);
+
+    public string LeagueNameNewCs => GetLeagueName(ContentLanguage.NewMandarin);
+
+    public string KickOffDate => $"{KickOffTime.Day}/{KickOffTime.Month}";
+
+    public int? HtHomeScore { get; set; }
+
+    public int? HtAwayScore { get; set; }
+
+    public int? FinalHomeScore { get; set; }
+
+    public int? FinalAwayScore { get; set; }
+
+    private string GetTeamName(string languageCode)
+    {
+        if (IsRacing(SportType))
+        {
+            return $"{RefDataService.GetEvent(languageCode)} {VendorId} - ID {Distance}";
+        }
+
+        var home = RefDataService.GetTeamName(HomeId, languageCode, IsMatch3rd);
+        var away = RefDataService.GetTeamName(AwayId, languageCode, IsMatch3rd);
+
+        return string.IsNullOrEmpty(home) || string.IsNullOrEmpty(away) ? TeamName : $"{home} -vs- {away}";
+    }
+
+    private static bool IsRacing(int sportType) => sportType is SportTypes.VirtualDogs or SportTypes.VirtualHorses or SportTypes.VirtualSteepleChase or SportTypes.VirtualHarnessRacing or SportTypes.VirtualMotorRacing;
+
+    private string GetLeagueName(string languageCode)
+    {
+        var value = RefDataService.GetLeagueName(LeagueId, languageCode, IsMatch3rd);
+
+        return string.IsNullOrEmpty(value) ? LeagueName : value;
+    }
+}

@@ -67,6 +67,7 @@ public class PendingCommandControllerImp(
                     .AddSection("Server Info", CommonInfoGetters.GetServerInfo)
                     .AddSection("Exception Info", () => CommonInfoGetters.GetExceptionInfo(ex))
                     .ToString();
+
                 await LogServiceSentry.ErrorAsync(logMessage);
                 await siteDbPendingCommandService.UpdatePendingCommandStatus(command.PId, CommandStatus.Failed);
             }

@@ -11,7 +11,7 @@ public interface CommandService
 
 public class CommandServiceImp(IDynamicRepository repository) : CommandService
 {
-    private const int MaxBatchSize = 1000;
+    private const int MaxBatchSize = 3;
 
     public async Task<IEnumerable<SiteDbPendingCommand>> GetPendingCommandsBySite(int siteGroupId)
     {

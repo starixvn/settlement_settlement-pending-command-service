@@ -1,0 +1,95 @@
+﻿using Fanex.Data.Repository;
+using Fanex.PendingCommand.Broadcast.Constants;
+using Fanex.PendingCommand.Broadcast.Criteria;
+using Fanex.PendingCommand.Broadcast.Models;
+using Fanex.Settlement.Converter.Services;
+using Fanex.SiteDbConnectionManager.Client.Models;
+
+namespace Fanex.PendingCommand.Broadcast.Services;
+
+public interface AnnouncementService
+{
+    Task SendAnnounceRefund(List<TicketSettleInfo> currentTickets, MatchInfo matchInfo, SiteDbPendingCommand command, string siteName);
+}
+
+public class AnnouncementServiceImp(
+    IDynamicRepository repository,
+    XmlConvertService xmlConvertService,
+    MessageAnnouncementService messageAnnouncementService,
+    TicketInfoService ticketService) : AnnouncementService
+{
+    public async Task SendAnnounceRefund(List<TicketSettleInfo> currentTickets, MatchInfo matchInfo, SiteDbPendingCommand command, string siteName)
+    {
+        var settledTickets = (await ticketService.GetTicketsByTransIds(currentTickets, command, siteName)).ToList();
+
+        if (settledTickets.Count > 0)
+        {
+            var groupTickets = CreateGroupsStatus(currentTickets, settledTickets).ToList();
+            await HandleInsertMessage(matchInfo, groupTickets, command.AdminId);
+        }
+    }
+
+    private static IEnumerable<IGrouping<TicketType, TicketSettleInfo>> CreateGroupsStatus(
+        IEnumerable<TicketSettleInfo> prevSettleTickets,
+        IEnumerable<TicketSettleInfo> settledTickets)
+    {
+        var result = settledTickets.Join(prevSettleTickets,
+            st => st.TransId,
+            pst => pst.TransId,
+            (st, pst) => new TicketSettleInfo
+            {
+                TransId = st.TransId,
+                MemberId = st.MemberId,
+                MemberUserName = st.MemberUserName,
+                AgentId = st.AgentId,
+                AgentUserName = st.AgentUserName,
+                MasterId = st.MasterId,
+                MasterUserName = st.MasterUserName,
+                SuperId = st.SuperId,
+                SuperUserName = st.SuperUserName,
+                StatusId = pst.StatusId
+            });
+
+        var groupStatus = result.GroupBy(x => x.Status);
+
+        return groupStatus;
+    }
+
+    private async Task HandleInsertMessage(
+        MatchInfo matchInfo,
+        IEnumerable<IGrouping<TicketType, TicketSettleInfo>> groups,
+        int adminId)
+    {
+        foreach (var group in groups)
+        {
+            var messageId = await GetMessageId(matchInfo, group.Key, adminId);
+            var items = messageAnnouncementService.CreateMessageItems(group, messageId);
+
+            await CreateMessageUpload(items, adminId);
+        }
+    }
+
+    private async Task<int> GetMessageId(MatchInfo matchInfo, TicketType ticketType, int adminId)
+    {
+        var criteria = messageAnnouncementService.CreateMessageCriteria(matchInfo, ticketType, adminId);
+        return await repository.GetAsync<int>(criteria);
+    }
+
+    private async Task CreateMessageUpload(List<MessageAnnounenceItem> items, int adminId)
+    {
+        var message = new MessageAnnounence
+        {
+            Items = items
+        };
+
+        var xmlMessage = xmlConvertService.Serialize(message);
+
+        var criteria = new MessageUploadCriteria
+        {
+            XMLMessage = xmlMessage,
+            CreatorId = adminId
+        };
+
+        await repository.ExecuteAsync(criteria);
+    }
+}

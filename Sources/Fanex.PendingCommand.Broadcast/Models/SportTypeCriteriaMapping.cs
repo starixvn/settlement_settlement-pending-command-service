@@ -1,4 +1,4 @@
-﻿namespace Fanex.PendingCommand.Models;
+﻿namespace Fanex.PendingCommand.Broadcast.Models;
 
 public class SportTypeCriteriaMapping
 {
