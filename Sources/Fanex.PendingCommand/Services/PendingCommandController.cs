@@ -47,6 +47,9 @@ public class PendingCommandControllerImp(
             {
                 if (processorsDictionary.TryGetValue(command.SystemName, out var processor))
                 {
+                    var logTest = $"MatchId = {command.MatchId} - Site Id = {command.SiteDBGroupId} - SystemName = {command.SystemName}";
+                    Console.WriteLine(logTest);
+
                     await RetryPolicy.ExecuteAsync(async () =>
                     {
                         await processor.ProcessAsync(command, siteDb);
