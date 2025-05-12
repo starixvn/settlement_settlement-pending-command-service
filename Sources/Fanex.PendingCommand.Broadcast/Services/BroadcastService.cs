@@ -35,6 +35,9 @@ public class BroadcastServiceImp(
 
         // LeapGaming ranges (178-179)
         new(SportType.LeapGamingMin..SportType.LeapGamingMax, typeof(LeapGamingCriteria)),
+
+        // Virtual Inspired ranges (180-186)
+        new(SportType.VirtualInspiredMin..SportType.VirtualInspiredMax, typeof(VirtualSportsCriteria)),
     ];
 
     public async Task CalculateAsync(SiteDbPendingCommand command, SiteDb siteDb)
@@ -58,10 +61,8 @@ public class BroadcastServiceImp(
     private static bool IsValidCommand(SiteDbPendingCommand command) =>
         !string.IsNullOrWhiteSpace(command.Parameter);
 
-    private async Task<List<TicketSettleInfo>> GetCurrentTicketsIfNeeded(SiteDbPendingCommand command, SiteDb siteDb)
-    {
-        return notifyService.ShouldSendNotification(command) ? (await ticketService.GetTicketsByAction(command, siteDb.SiteName)).ToList() : [];
-    }
+    private async Task<List<TicketSettleInfo>> GetCurrentTicketsIfNeeded(SiteDbPendingCommand command, SiteDb siteDb) =>
+        notifyService.ShouldSendNotification(command) ? (await ticketService.GetTicketsByAction(command, siteDb.SiteName)).ToList() : [];
 
     private async Task SendNotificationIfNeeded(SiteDbPendingCommand command, SiteDb siteDb, List<TicketSettleInfo> currentTickets)
     {

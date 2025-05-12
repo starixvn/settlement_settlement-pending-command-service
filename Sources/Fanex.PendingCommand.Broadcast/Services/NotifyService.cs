@@ -20,6 +20,8 @@ public class NotifyServiceImp(
     [
         (SportType.VirtualBetRadarMin..SportType.VirtualBetRadarMax),
         (SportType.LeapGamingMin..SportType.LeapGamingMax),
+        (SportType.VirtualInspiredMin..SportType.VirtualInspiredMax)
+
     ];
 
     public bool ShouldSendNotification(SiteDbPendingCommand command) =>
