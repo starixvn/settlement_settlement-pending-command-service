@@ -18,7 +18,8 @@ public class NotifyServiceImp(
 {
     private static readonly List<Range> NotifyRanges =
     [
-        (SportType.VirtualBetRadarMin..SportType.VirtualBetRadarMax) // VirtualBetRadar
+        (SportType.VirtualBetRadarMin..SportType.VirtualBetRadarMax),
+        (SportType.LeapGamingMin..SportType.LeapGamingMax),
     ];
 
     public bool ShouldSendNotification(SiteDbPendingCommand command) =>

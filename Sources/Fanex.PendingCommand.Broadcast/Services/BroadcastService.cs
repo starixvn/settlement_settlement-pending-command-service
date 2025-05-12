@@ -27,10 +27,14 @@ public class BroadcastServiceImp(
     [
         // Specific types
         new(SportType.NumberGame, typeof(NumberGameCriteria)),
+        new(SportType.CockFighting, typeof(LeapGamingCriteria)),
 
         // Ranges
         // Virtual BetRadar ranges (190-199)
         new(SportType.VirtualBetRadarMin..SportType.VirtualBetRadarMax, typeof(VirtualBetRadarCriteria)),
+
+        // LeapGaming ranges (178-179)
+        new(SportType.LeapGamingMin..SportType.LeapGamingMax, typeof(LeapGamingCriteria)),
     ];
 
     public async Task CalculateAsync(SiteDbPendingCommand command, SiteDb siteDb)

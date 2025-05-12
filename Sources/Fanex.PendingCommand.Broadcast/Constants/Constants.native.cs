@@ -44,6 +44,10 @@ public static class MsgContentType
 public static class SportType
 {
     public const int NumberGame = 161;
+    public const int CockFighting = 188;
+
     public const int VirtualBetRadarMin = 190;
     public const int VirtualBetRadarMax = 199;
+    public const int LeapGamingMin = 178;
+    public const int LeapGamingMax = 179;
 }
