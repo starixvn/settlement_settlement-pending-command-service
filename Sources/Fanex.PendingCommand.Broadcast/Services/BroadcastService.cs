@@ -27,6 +27,7 @@ public class BroadcastServiceImp(
     [
         // Specific types
         new(SportType.NumberGame, typeof(NumberGameCriteria)),
+        new(SportType.BitCoin, typeof(BitCoinCriteria)),
         new(SportType.CockFighting, typeof(LeapGamingCriteria)),
 
         // Ranges
