@@ -20,7 +20,7 @@ public class AnnouncementServiceImp(
 {
     public async Task SendAnnounceRefund(List<TicketSettleInfo> currentTickets, MatchInfo matchInfo, SiteDbPendingCommand command, string siteName)
     {
-        var settledTickets = (await ticketService.GetTicketsByTransIds(currentTickets, command, siteName)).ToList();
+        var settledTickets = (await ticketService.GetTicketsByTransIds(currentTickets, command, matchInfo.SportType, siteName)).ToList();
 
         if (settledTickets.Count > 0)
         {

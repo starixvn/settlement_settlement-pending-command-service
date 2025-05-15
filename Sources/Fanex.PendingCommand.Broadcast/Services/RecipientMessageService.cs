@@ -7,6 +7,8 @@ namespace Fanex.PendingCommand.Broadcast.Services;
 public interface RecipientMessageService
 {
     Task Message(string action, MatchInfo matchInfo, string siteName);
+
+    Task SendMessageVirtualSportFive(string action, MatchInfo matchInfo, string siteName, List<ResourceItemModel> resources);
 }
 
 public class RecipientMessageServiceImp(
@@ -24,6 +26,36 @@ public class RecipientMessageServiceImp(
 
         await CreditGroup(actionName, matchInfo, creditTickets.ToList(), MailVirtualSport.CreditMailId);
         await DepositGroup(actionName, matchInfo, depositTickets.ToList(), MailVirtualSport.DepositMailId);
+    }
+
+    public async Task SendMessageVirtualSportFive(string action, MatchInfo matchInfo, string siteName, List<ResourceItemModel> resources)
+    {
+        var htResult = resources.Find(resource => resource.Id == ResourceId.HalfTimeResourceId);
+
+        var isHtReSettle = htResult != null && IsHtResettle(action, htResult, matchInfo);
+
+        if (!isHtReSettle)
+        {
+            return;
+        }
+
+        var resourceIds = string.Join(',', resources.Select(r => r.Id));
+        var (creditTickets, depositTickets) = await matchService.GetTickets3rd(matchInfo.MatchId, matchInfo.SportType, siteName, resourceIds);
+
+        var actionName = GetActionName(action);
+
+        await CreditGroup(actionName, matchInfo, creditTickets.ToList(), MailVirtualSport.CreditMailId);
+        await DepositGroup(actionName, matchInfo, depositTickets.ToList(), MailVirtualSport.DepositMailId);
+    }
+
+    private static bool IsHtResettle(string action, ResourceItemModel? htResult, MatchInfo matchInfo)
+    {
+        if (!string.Equals(action, ActionName.Calculate, StringComparison.OrdinalIgnoreCase) || htResult is null || matchInfo.HtHomeScore is null || matchInfo.HtAwayScore is null)
+        {
+            return false;
+        }
+
+        return int.Parse(htResult.Home) != matchInfo.HtHomeScore || int.Parse(htResult.Away) != matchInfo.HtAwayScore;
     }
 
     private static string GetActionName(string action) => string.Equals(action, ActionName.Refund, StringComparison.OrdinalIgnoreCase)

@@ -41,15 +41,15 @@ public static class MsgContentType
     public const short Settled = 110;
 }
 
-public static class SportType
+public static class ResourceId
 {
-    public const int NumberGame = 161;
-    public const int BitCoin = 175;
-    public const int CockFighting = 188;
-    public const int VirtualBetRadarMin = 190;
-    public const int VirtualBetRadarMax = 199;
-    public const int LeapGamingMin = 178;
-    public const int LeapGamingMax = 179;
-    public const int VirtualInspiredMin = 180;
-    public const int VirtualInspiredMax = 186;
+    public const string Quarter1 = "Q1";
+    public const string Quarter2 = "Q2";
+    public const string Quarter3 = "Q3";
+    public const string Quarter4 = "Q4";
+    public const string OverTime = "OT";
+
+    public const string FullTimeResourceId = "00";
+
+    public const string HalfTimeResourceId = "01";
 }

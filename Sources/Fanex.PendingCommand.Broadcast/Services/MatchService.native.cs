@@ -10,9 +10,11 @@ public interface MatchService
 {
     Task<MatchInfo> GetMatchInfo(int matchId);
 
+    IEnumerable<TicketInfo> SplitTicketByLicensee(IReadOnlyCollection<TicketInfo> ticketInfos);
+
     Task<Tickets> GetAllTicketsVirtualSports(int matchId, string siteName);
 
-    IEnumerable<TicketInfo> SplitTicketByLicensee(IReadOnlyCollection<TicketInfo> ticketInfos);
+    Task<Tickets> GetTickets3rd(int matchId, short sportType, string siteName, string resources);
 }
 
 public class MatchServiceImp(
@@ -41,6 +43,23 @@ public class MatchServiceImp(
     public async Task<Tickets> GetAllTicketsVirtualSports(int matchId, string siteName)
     {
         var criteria = new VirtualSportsTicketCriteria { MatchId = matchId, DbServer = siteName };
+        var tickets = await repository.FetchAsync<TicketInfo>(criteria);
+        var creditTickets = tickets.Where(x => !x.IsDeposit);
+        var depositTickets = tickets.Where(x => x.IsDeposit);
+
+        return (creditTickets, depositTickets);
+    }
+
+    public async Task<Tickets> GetTickets3rd(int matchId, short sportType, string siteName, string resources)
+    {
+        var criteria = new VirtualSportsFiveTicketCriteria
+        {
+            MatchId = matchId,
+            SportType = sportType,
+            ResourceIds = resources,
+            DbServer = siteName
+        };
+
         var tickets = await repository.FetchAsync<TicketInfo>(criteria);
         var creditTickets = tickets.Where(x => !x.IsDeposit);
         var depositTickets = tickets.Where(x => x.IsDeposit);

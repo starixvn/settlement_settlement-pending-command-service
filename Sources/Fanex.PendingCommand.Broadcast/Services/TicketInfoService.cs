@@ -10,20 +10,24 @@ public interface TicketInfoService
 {
     Task<IEnumerable<TicketSettleInfo>> GetTicketsByAction(SiteDbPendingCommand command, string siteName);
 
-    Task<IEnumerable<TicketSettleInfo>> GetTicketsByTransIds(List<TicketSettleInfo> tickets, SiteDbPendingCommand command, string siteName);
+    Task<IEnumerable<TicketSettleInfo>> GetTicketsByTransIds(List<TicketSettleInfo> tickets, SiteDbPendingCommand command, short sportType, string siteName);
 }
 
-public class TicketInfoServiceImp(IDynamicRepository repository)
+public class TicketInfoServiceImp(
+    IDynamicRepository repository,
+    MatchService matchService)
     : TicketInfoService
 {
     public async Task<IEnumerable<TicketSettleInfo>> GetTicketsByAction(SiteDbPendingCommand command, string siteName)
     {
         if (string.Equals(command.Action, ActionName.Refund, StringComparison.OrdinalIgnoreCase))
         {
+            var matchInfo = await matchService.GetMatchInfo(command.MatchId);
+
             var criteria = new TicketSettleCriteria
             {
-                MatchId = command.MatchId,
-                SportType = (short)command.SportType,
+                MatchId = matchInfo.MatchId,
+                SportType = matchInfo.SportType,
                 DbServer = siteName
             };
 
@@ -33,7 +37,7 @@ public class TicketInfoServiceImp(IDynamicRepository repository)
         return [];
     }
 
-    public async Task<IEnumerable<TicketSettleInfo>> GetTicketsByTransIds(List<TicketSettleInfo> tickets, SiteDbPendingCommand command, string siteName)
+    public async Task<IEnumerable<TicketSettleInfo>> GetTicketsByTransIds(List<TicketSettleInfo> tickets, SiteDbPendingCommand command, short sportType, string siteName)
     {
         if (tickets.Count == 0)
         {
@@ -44,7 +48,7 @@ public class TicketInfoServiceImp(IDynamicRepository repository)
         var criteria = new TicketSettleCriteria
         {
             MatchId = command.MatchId,
-            SportType = (short)command.SportType,
+            SportType = sportType,
             TransIDs = transIds,
             DbServer = siteName
         };
