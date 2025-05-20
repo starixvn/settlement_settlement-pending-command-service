@@ -1,6 +1,6 @@
 ﻿namespace Fanex.PendingCommand.Broadcast.Criteria;
 
-public class VirtualSportFiveCriteria : BroadcastCriteriaBase
+public class VirtualSportCriteria : BroadcastCriteriaBase
 {
     public int SportType { get; set; }
 

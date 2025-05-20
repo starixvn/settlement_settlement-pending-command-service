@@ -3,7 +3,7 @@ using Fanex.Data.Repository;
 
 namespace Fanex.PendingCommand.Broadcast.Criteria;
 
-public class VirtualSportsTicketCriteria : NonQueryCommand
+public class VirtualSportTicketCriteria : NonQueryCommand
 {
     public int MatchId { get; set; }
 

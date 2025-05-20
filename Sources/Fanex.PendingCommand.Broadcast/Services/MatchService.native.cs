@@ -42,7 +42,7 @@ public class MatchServiceImp(
 
     public async Task<Tickets> GetAllTicketsVirtualSports(int matchId, string siteName)
     {
-        var criteria = new VirtualSportsTicketCriteria { MatchId = matchId, DbServer = siteName };
+        var criteria = new VirtualSportTicketCriteria { MatchId = matchId, DbServer = siteName };
         var tickets = await repository.FetchAsync<TicketInfo>(criteria);
         var creditTickets = tickets.Where(x => !x.IsDeposit);
         var depositTickets = tickets.Where(x => x.IsDeposit);
@@ -52,7 +52,7 @@ public class MatchServiceImp(
 
     public async Task<Tickets> GetTickets3rd(int matchId, short sportType, string siteName, string resources)
     {
-        var criteria = new VirtualSportsFiveTicketCriteria
+        var criteria = new VirtualSportFiveTicketCriteria
         {
             MatchId = matchId,
             SportType = sportType,

@@ -25,12 +25,13 @@ public class BroadcastServiceImp(
         new(ProductType.BitCoin, typeof(BitCoinCriteria)),
         new(ProductType.LeapGaming, typeof(LeapGamingCriteria)),
         new(ProductType.CockFighting, typeof(LeapGamingCriteria)),
-        new(ProductType.VirtualSports, typeof(VirtualSportsCriteria)),
+        new(ProductType.VirtualSports, typeof(VirtualSportsInspiredCriteria)),
         new(ProductType.VirtualBetRadar, typeof(VirtualBetRadarCriteria)),
         new(ProductType.Outright, typeof(OutrightCriteria)),
         new(ProductType.FastMarket, typeof(FastMarketCriteria)),
         new(ProductType.BetBuilder, typeof(BetBuilderCriteria)),
-        new(ProductType.VirtualSports5, typeof(VirtualSportFiveCriteria)),
+        new(ProductType.VirtualSports5, typeof(VirtualSportCriteria)),
+        new(ProductType.VirtualSports6, typeof(VirtualSportCriteria)),
 
     ];
 

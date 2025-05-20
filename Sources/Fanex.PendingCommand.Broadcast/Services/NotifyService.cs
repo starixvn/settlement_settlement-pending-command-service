@@ -27,6 +27,7 @@ public class NotifyServiceImp(
         ProductType.CockFighting,
         ProductType.VirtualSports,
         ProductType.VirtualSports5,
+        ProductType.VirtualSports6,
 
     ];
 
@@ -36,18 +37,41 @@ public class NotifyServiceImp(
     public async Task NotifyAsync(SiteDbPendingCommand command, SiteDb siteDb, List<TicketSettleInfo> currentTickets)
     {
         var matchInfo = await matchService.GetMatchInfo(command.MatchId);
-        if (command.ProductType.Equals(ProductType.VirtualSports5))
-        {
-            var resources = GetResources(command.Parameter);
-            await recipientMessageService.SendMessageVirtualSportFive(command.Action, matchInfo, siteDb.SiteName, resources);
-        }
-        else
-        {
-            await recipientMessageService.Message(command.Action, matchInfo, siteDb.SiteName);
-        }
-
+        
+        await SendRecipientMessage(command, matchInfo, siteDb.SiteName);
         await announcementService.SendAnnounceRefund(currentTickets, matchInfo, command, siteDb.SiteName);
     }
+
+    private async Task SendRecipientMessage(SiteDbPendingCommand command, MatchInfo matchInfo, string siteName)
+    {
+        if (IsVirtualSportFiveOrSix(command.ProductType))
+        {
+            var resources = GetResources(command.Parameter);
+            await SendVirtualSportMessage(command, matchInfo, siteName, resources);
+            return;
+        }
+
+        await recipientMessageService.Message(command.Action, matchInfo, siteName);
+    }
+
+    private async Task SendVirtualSportMessage(
+        SiteDbPendingCommand command, 
+        MatchInfo matchInfo, 
+        string siteName, 
+        List<ResourceItemModel> resources)
+    {
+        if (command.ProductType.Equals(ProductType.VirtualSports5))
+        {
+            await recipientMessageService.SendMessageVirtualSportFive(command.Action, matchInfo, siteName, resources);
+            return;
+        }
+
+        await recipientMessageService.SendMessageVirtualSportSix(command.Action, matchInfo, siteName, resources);
+    }
+
+    private static bool IsVirtualSportFiveOrSix(string productType) =>
+        productType.Equals(ProductType.VirtualSports5) || 
+        productType.Equals(ProductType.VirtualSports6);
 
     private static bool IsValidAction(string action) =>
         action.Equals(ActionName.Refund, StringComparison.OrdinalIgnoreCase) ||
@@ -58,7 +82,7 @@ public class NotifyServiceImp(
 
     private static List<ResourceItemModel> GetResources(string parameter)
     {
-        var criteria = JsonSerializer.Deserialize<VirtualSportFiveCriteria>(
+        var criteria = JsonSerializer.Deserialize<VirtualSportCriteria>(
             parameter,
             StringExtensions.Options
         )!;

@@ -9,6 +9,8 @@ public interface RecipientMessageService
     Task Message(string action, MatchInfo matchInfo, string siteName);
 
     Task SendMessageVirtualSportFive(string action, MatchInfo matchInfo, string siteName, List<ResourceItemModel> resources);
+
+    Task SendMessageVirtualSportSix(string action, MatchInfo matchInfo, string siteName, List<ResourceItemModel> resources);
 }
 
 public class RecipientMessageServiceImp(
@@ -17,6 +19,8 @@ public class RecipientMessageServiceImp(
    IConfiguration configuration) : RecipientMessageService
 {
     private MailInfo MailVirtualSport => configuration.GetSection("MailFunction:VirtualSport").Get<MailInfo>();
+
+    private MailInfo MailVirtualBetby => configuration.GetSection("MailFunction:VirtualBetby").Get<MailInfo>();
 
     public async Task Message(string action, MatchInfo matchInfo, string siteName)
     {
@@ -46,6 +50,26 @@ public class RecipientMessageServiceImp(
 
         await CreditGroup(actionName, matchInfo, creditTickets.ToList(), MailVirtualSport.CreditMailId);
         await DepositGroup(actionName, matchInfo, depositTickets.ToList(), MailVirtualSport.DepositMailId);
+    }
+
+    public async Task SendMessageVirtualSportSix(string action, MatchInfo matchInfo, string siteName, List<ResourceItemModel> resources)
+    {
+        var resourceIds = GetResourcesIds(action, resources);
+
+        var (creditTickets, depositTickets) = await matchService.GetTickets3rd(matchInfo.MatchId, matchInfo.SportType, siteName, resourceIds);
+
+        var actionName = GetActionName(action);
+        await CreditGroup(actionName, matchInfo, creditTickets.ToList(), MailVirtualBetby.CreditMailId);
+        await DepositGroup(actionName, matchInfo, depositTickets.ToList(), MailVirtualBetby.DepositMailId);
+    }
+
+    private static string GetResourcesIds(string action, IEnumerable<ResourceItemModel> resources)
+    {
+        var resettleResource = string.Equals(action, ActionName.Refund, StringComparison.OrdinalIgnoreCase)
+            ? resources
+            : resources.Where(r => r.IsDuplicated).ToList();
+
+        return string.Join(',', resettleResource.Select(r => r.Id));
     }
 
     private static bool IsHtResettle(string action, ResourceItemModel? htResult, MatchInfo matchInfo)
