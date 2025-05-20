@@ -30,7 +30,7 @@ public class BroadcastServiceImp(
         new(ProductType.Outright, typeof(OutrightCriteria)),
         new(ProductType.FastMarket, typeof(FastMarketCriteria)),
         new(ProductType.BetBuilder, typeof(BetBuilderCriteria)),
-        new(ProductType.VirtualSports5, typeof(VirtualSportFiveSettleCriteria)),
+        new(ProductType.VirtualSports5, typeof(VirtualSportFiveCriteria)),
 
     ];
 
@@ -68,7 +68,7 @@ public class BroadcastServiceImp(
         }
     }
 
-    private static BroadcastCriteriaBase? CreateCriteria(SiteDbPendingCommand command, SiteDb siteDb)
+    private static BroadcastCriteriaBase CreateCriteria(SiteDbPendingCommand command, SiteDb siteDb)
     {
         var criteriaType = GetCriteriaType(command.ProductType);
         if (criteriaType == null)

@@ -1,5 +1,4 @@
 ﻿using Fanex.Caching;
-using Fanex.Caching.Redis;
 using Fanex.Data.Repository;
 using Fanex.PendingCommand.Broadcast.Services;
 using Fanex.PendingCommand.Services;
@@ -19,7 +18,6 @@ public static class DependenceInjection
     {
         service.AddSingleton<XmlConvertService, XmlConvertServiceImp>();
         service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        service.AddSingleton<ICacheService, CacheService>();
         service.AddScoped<ICommandProcessor, BroadcastCommandProcessor>();
         service.AddScoped<ICommandProcessor, AutoPayoutCommandProcessor>();
         service.AddTransient<PendingCommandController, PendingCommandControllerImp>();
@@ -54,10 +52,6 @@ public static class DependenceInjection
         var redisConfig = configuration.GetSection("Fanex.Caching.Redis:RedisConfig").Value;
         var applicationName = configuration.GetSection("Fanex.Caching.Redis:ChannelPrefix").Value;
         services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect($"{redisConfig},ChannelPrefix={applicationName}"));
-        services.AddSingleton<ICache>(new RedisCache(new RedisCacheOptions
-        {
-            ConnectionString = redisConfig,
-            ApplicationName = applicationName
-        }));
+        services.AddSingleton<ICacheService>(new CacheService());
     }
 }

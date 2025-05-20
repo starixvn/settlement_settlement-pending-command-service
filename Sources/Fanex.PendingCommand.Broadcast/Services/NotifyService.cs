@@ -58,7 +58,7 @@ public class NotifyServiceImp(
 
     private static List<ResourceItemModel> GetResources(string parameter)
     {
-        var criteria = JsonSerializer.Deserialize<VirtualSportFiveSettleCriteria>(
+        var criteria = JsonSerializer.Deserialize<VirtualSportFiveCriteria>(
             parameter,
             StringExtensions.Options
         )!;

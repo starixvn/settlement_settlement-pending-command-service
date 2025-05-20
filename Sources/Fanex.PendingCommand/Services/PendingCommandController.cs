@@ -15,7 +15,7 @@ public interface PendingCommandController
 }
 
 public class PendingCommandControllerImp(
-    SiteDbService siteDBService,
+    SiteDbClientService siteDBService,
     CommandService commandService,
     SiteDbPendingCommandService siteDbPendingCommandService,
     IEnumerable<ICommandProcessor> commandProcessors) : PendingCommandController
