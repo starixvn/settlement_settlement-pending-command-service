@@ -32,6 +32,7 @@ public class BroadcastServiceImp(
         new(ProductType.BetBuilder, typeof(BetBuilderCriteria)),
         new(ProductType.VirtualSports5, typeof(VirtualSportCriteria)),
         new(ProductType.VirtualSports6, typeof(VirtualSportCriteria)),
+        new(ProductType.PinGoal, typeof(PinGoalCriteria)),
 
     ];
 
