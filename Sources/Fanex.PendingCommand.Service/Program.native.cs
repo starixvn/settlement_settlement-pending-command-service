@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using ONEbook.UM.DependencyInjection;
+using Settlement.Business;
+using Settlement.Business.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,8 @@ builder.Services.AddFanexSql(builder.Configuration);
 builder.Services.InternalConfigServices(builder.Configuration);
 builder.Services.AddSiteDbConnectionManagerServices();
 builder.Services.AddMailDelivery(builder.Configuration);
-
+builder.Services.AddSettlementBusinessServices();
+builder.Services.AddSettlementBusinessDataServices();
 builder.Services.AddHostedService<ProcessingService>();
 
 var app = builder.Build();

@@ -4,6 +4,8 @@ using Fanex.PendingCommand.Broadcast.Extensions;
 using Fanex.PendingCommand.Broadcast.Models;
 using Fanex.Settlement.ThirdPartyBroadcast.Shared;
 using Fanex.SiteDbConnectionManager.Client.Models;
+using Settlement.Business.Core.Requests;
+using Settlement.Business.Data.Services.Products;
 using System.Text.Json;
 
 namespace Fanex.PendingCommand.Broadcast.Services;
@@ -16,7 +18,8 @@ public interface IBroadcastService
 public class BroadcastServiceImp(
     IDynamicRepository repository,
     NotifyService notifyService,
-    TicketInfoService ticketService) : IBroadcastService
+    TicketInfoService ticketService,
+    HappyFiveProcessService processService) : IBroadcastService
 {
     private static readonly List<ProductTypeCriteriaMapping> Mappings =
     [
@@ -33,6 +36,7 @@ public class BroadcastServiceImp(
         new(ProductType.VirtualSports5, typeof(VirtualSportCriteria)),
         new(ProductType.VirtualSports6, typeof(VirtualSportCriteria)),
         new(ProductType.PinGoal, typeof(PinGoalCriteria)),
+        new(ProductType.HappyFive, typeof(BroadcastCriteriaBase)),
 
     ];
 
@@ -49,9 +53,21 @@ public class BroadcastServiceImp(
             return;
         }
 
-        var currentTickets = await GetCurrentTicketsIfNeeded(command, siteDb);
-        await repository.ExecuteAsync(criteria);
-        await SendNotificationIfNeeded(command, siteDb, currentTickets);
+        if (command.ProductType == ProductType.HappyFive)
+        {
+            var criteriaHappyFive = JsonSerializer.Deserialize<BatchTicketRequest>(
+                command.Parameter,
+                StringExtensions.Options
+            )!;
+
+            await processService.Settle(criteriaHappyFive);
+        }
+        else
+        {
+            var currentTickets = await GetCurrentTicketsIfNeeded(command, siteDb);
+            await repository.ExecuteAsync(criteria);
+            await SendNotificationIfNeeded(command, siteDb, currentTickets);
+        }
     }
 
     private static bool IsValidCommand(SiteDbPendingCommand command) =>
