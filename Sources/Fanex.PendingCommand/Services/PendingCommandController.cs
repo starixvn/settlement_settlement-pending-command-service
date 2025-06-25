@@ -15,65 +15,96 @@ public interface PendingCommandController
 }
 
 public class PendingCommandControllerImp(
-    SiteDbClientService siteDBService,
+    SiteDbClientService siteDbService,
     CommandService commandService,
     SiteDbPendingCommandService siteDbPendingCommandService,
     IEnumerable<ICommandProcessor> commandProcessors) : PendingCommandController
 {
+    private const int MaxRetryAttempts = 3;
+    private const int RetryDelaySeconds = 2;
+    
     private static readonly IAsyncPolicy RetryPolicy = Policy
         .Handle<Exception>()
-        .WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
+        .WaitAndRetryAsync(MaxRetryAttempts, _ => TimeSpan.FromSeconds(RetryDelaySeconds));
 
     public async Task ProcessAsync()
     {
-        var activeSiteDBs = await siteDBService.GetActiveSiteDbAsync();
-        if (activeSiteDBs.Count == 0)
+        var activeSiteDatabases = await siteDbService.GetActiveSiteDbAsync();
+        
+        if (!activeSiteDatabases.Any())
         {
             return;
         }
 
-        var tasks = activeSiteDBs.Select(ProcessSiteDbAsync);
-        await Task.WhenAll(tasks);
+        var processingTasks = activeSiteDatabases.Select(ProcessSiteDatabaseAsync);
+        await Task.WhenAll(processingTasks);
     }
 
-    private async Task ProcessSiteDbAsync(SiteDb siteDb)
+    private async Task ProcessSiteDatabaseAsync(SiteDb siteDatabase)
     {
-        var processorsDictionary = commandProcessors.ToDictionary(p => p.SystemName);
-        var pendingCommands = await commandService.GetPendingCommandsBySite(siteDb.SiteDbGroupId);
+        var processorLookup = commandProcessors.ToDictionary(p => p.SystemName);
+        var pendingCommands = await commandService.GetPendingCommandsBySite(siteDatabase.SiteDbGroupId);
 
         foreach (var command in pendingCommands)
         {
-            try
-            {
-                if (processorsDictionary.TryGetValue(command.SystemName, out var processor))
-                {
-                    var logTest = $"MatchId = {command.MatchId} - Site Id = {siteDb.SiteName} - SystemName = {command.SystemName}";
-                    Console.WriteLine(logTest);
-
-                    await RetryPolicy.ExecuteAsync(async () =>
-                    {
-                        await processor.ProcessAsync(command, siteDb);
-                    });
-                }
-
-                await siteDbPendingCommandService.UpdatePendingCommandStatus(command.PId, CommandStatus.Completed);
-            }
-            catch (Exception ex)
-            {
-                var logMessage = new LogMessage($"Command processing failed after 3 retries: {ex.Message}")
-                    .AddSection("Command Info", () => new Dictionary<string, object>
-                    {
-                        { "PId", command.PId },
-                        { "SystemName", command.SystemName }
-                    })
-                    .AddSection("Database Info", () => DatabaseInfoGetters.GetDbExceptionInfo(ex))
-                    .AddSection("Server Info", CommonInfoGetters.GetServerInfo)
-                    .AddSection("Exception Info", () => CommonInfoGetters.GetExceptionInfo(ex))
-                    .ToString();
-
-                await LogServiceSentry.ErrorAsync(logMessage);
-                await siteDbPendingCommandService.UpdatePendingCommandStatus(command.PId, CommandStatus.Failed);
-            }
+            await ProcessCommandAsync(command, processorLookup, siteDatabase);
         }
+    }
+
+    private async Task ProcessCommandAsync(
+        SiteDbPendingCommand command, 
+        Dictionary<string, ICommandProcessor> processorLookup, 
+        SiteDb siteDatabase)
+    {
+        try
+        {
+            if (processorLookup.TryGetValue(command.SystemName, out var processor))
+            {
+                await ExecuteCommandWithRetryAsync(processor, command, siteDatabase);
+            }
+
+            await siteDbPendingCommandService.UpdatePendingCommandStatus(command.PId, CommandStatus.Completed);
+        }
+        catch (Exception ex)
+        {
+            await HandleCommandProcessingErrorAsync(command, ex);
+        }
+    }
+
+    private async Task ExecuteCommandWithRetryAsync(
+        ICommandProcessor processor, 
+        SiteDbPendingCommand command, 
+        SiteDb siteDatabase)
+    {
+        await RetryPolicy.ExecuteAsync(async () =>
+        {
+            await processor.ProcessAsync(command, siteDatabase);
+        });
+    }
+
+    private async Task HandleCommandProcessingErrorAsync(SiteDbPendingCommand command, Exception exception)
+    {
+        var logMessage = CreateErrorMessage(command, exception);
+        await LogServiceSentry.ErrorAsync(logMessage);
+        await siteDbPendingCommandService.UpdatePendingCommandStatus(command.PId, CommandStatus.Failed);
+    }
+
+    private static string CreateErrorMessage(SiteDbPendingCommand command, Exception exception)
+    {
+        return new LogMessage($"Command processing failed after {MaxRetryAttempts} retries: {exception.Message}")
+            .AddSection("Command Info", () => CreateCommandInfo(command))
+            .AddSection("Database Info", () => DatabaseInfoGetters.GetDbExceptionInfo(exception))
+            .AddSection("Server Info", CommonInfoGetters.GetServerInfo)
+            .AddSection("Exception Info", () => CommonInfoGetters.GetExceptionInfo(exception))
+            .ToString();
+    }
+
+    private static Dictionary<string, object> CreateCommandInfo(SiteDbPendingCommand command)
+    {
+        return new Dictionary<string, object>
+        {
+            { "PId", command.PId },
+            { "SystemName", command.SystemName }
+        };
     }
 }
