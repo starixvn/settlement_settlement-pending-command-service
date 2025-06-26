@@ -36,6 +36,7 @@ public class MatchServiceImp(
 
         return distinctLicensees.Select(licensee => new TicketInfo
         {
+            SiteName = licensee,
             TicketsInfo = ticketInfos.Where(ticket => ticket.SiteName == licensee).ToList()
         });
     }
